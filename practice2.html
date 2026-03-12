@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV Practice – Smart Quiz</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --soft: #e2e8f0;
+      --border: #cbd5e1;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --danger-bg: #fee2e2;
+      --danger-text: #991b1b;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --warning-bg: #fef3c7;
+      --warning-text: #92400e;
+      --option-bg: #ffffff;
+      --option-hover: #f8faff;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    body.dark {
+      --bg: linear-gradient(135deg, #0f172a, #111827);
+      --card: #111827;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --soft: #1f2937;
+      --border: #374151;
+      --primary: #818cf8;
+      --primary-hover: #6366f1;
+      --danger-bg: #3f1d1d;
+      --danger-text: #fecaca;
+      --success-bg: #163021;
+      --success-text: #bbf7d0;
+      --warning-bg: #3f3218;
+      --warning-text: #fde68a;
+      --option-bg: #111827;
+      --option-hover: #172033;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+    .sub {
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .toolbar-right {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      background: var(--soft);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .progress {
+      width: 100%;
+      height: 10px;
+      background: var(--soft);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 16px 0 24px;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4f46e5, #7c3aed);
+      transition: width 0.25s ease;
+    }
+    .question-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 18px;
+    }
+    .answers {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    label.option {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      background: var(--option-bg);
+      color: var(--text);
+    }
+    label.option:hover {
+      border-color: var(--primary);
+      background: var(--option-hover);
+    }
+    label.option.selected {
+      border-color: var(--primary);
+      background: var(--option-hover);
+    }
+    label.option.correct-answer {
+      border-color: #22c55e;
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+    label.option.wrong-answer {
+      border-color: #ef4444;
+      background: var(--danger-bg);
+      color: var(--danger-text);
+    }
+    .option input {
+      margin-right: 10px;
+      transform: translateY(1px);
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    button, select {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    select {
+      background: var(--soft);
+      color: var(--text);
+    }
+    .primary { background: var(--primary); color: white; }
+    .primary:hover { background: var(--primary-hover); }
+    .secondary { background: var(--soft); color: var(--text); }
+    .secondary:hover { opacity: 0.92; }
+    .danger { background: var(--danger-bg); color: var(--danger-text); }
+    .success { background: var(--success-bg); color: var(--success-text); }
+    .hidden { display: none; }
+    .feedback {
+      margin: 8px 0 20px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+    .feedback.correct {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+    .feedback.wrong {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .stat {
+      background: var(--soft);
+      padding: 14px;
+      border-radius: 16px;
+      text-align: center;
+    }
+    .stat strong {
+      display: block;
+      font-size: 1.3rem;
+      margin-bottom: 4px;
+    }
+    .result-score {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 10px 0 8px;
+    }
+    .review-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 24px;
+    }
+    .review-item {
+      border: 1px solid var(--soft);
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--soft);
+    }
+    .correct { border-left: 6px solid #16a34a; }
+    .wrong { border-left: 6px solid #dc2626; }
+    .muted { color: var(--muted); }
+    .small { font-size: 0.95rem; line-height: 1.5; }
+    .setup {
+      display: grid;
+      gap: 14px;
+      margin: 20px 0 24px;
+    }
+    .setup-card {
+      background: var(--soft);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .setup-card h3 {
+      margin: 0 0 8px;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    @media (max-width: 760px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .wrap { padding: 14px; }
+      .card { padding: 18px; }
+      h1 { font-size: 1.5rem; }
+      .question-title { font-size: 1.05rem; }
+      .stats { grid-template-columns: 1fr; }
+      button, select { width: 100%; }
+      .toolbar-right { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div id="startScreen">
+        <h1>CV Practice – Smart Quiz</h1>
+        <p class="sub">Same format as your other site, but with your new CV practice questions. Instant feedback, dark mode, timer, shuffle, and practice-wrong mode are included.</p>
+
+        <div class="setup">
+          <div class="setup-card">
+            <h3>Quiz settings</h3>
+            <div class="toggle-row">
+              <label><input type="checkbox" id="instantFeedbackToggle" checked> Show instantly if answer is correct</label>
+            </div>
+            <div class="toggle-row">
+              <label><input type="checkbox" id="shuffleToggle"> Shuffle question order</label>
+            </div>
+            <div class="toggle-row">
+              <label><input type="checkbox" id="darkModeToggle"> Start in dark mode</label>
+            </div>
+            <div class="toggle-row">
+              <label for="timerSelect">Timer:</label>
+              <select id="timerSelect">
+                <option value="0">No timer</option>
+                <option value="15">15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="45">45 minutes</option>
+                <option value="60">60 minutes</option>
+                <option value="90">90 minutes</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="primary" id="startQuizBtn">Start full quiz</button>
+          <button class="secondary" id="startWrongBtn">Practice wrong answers</button>
+          <button class="secondary" id="themeBtnStart">Toggle dark mode</button>
+        </div>
+
+        <p class="footer-note">Tip: “Practice wrong answers” works after you finish at least one attempt.</p>
+      </div>
+
+      <div id="quizScreen" class="hidden">
+        <div class="toolbar">
+          <div class="toolbar-right">
+            <div class="pill" id="counter">Question 1 / 1</div>
+            <div class="pill" id="scorePreview">Score: 0</div>
+            <div class="pill" id="timerPill">Time: --:--</div>
+          </div>
+          <div class="toolbar-right">
+            <button class="secondary" id="themeBtnQuiz">Dark mode</button>
+          </div>
+        </div>
+
+        <div class="progress">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="question-title" id="questionText"></div>
+        <div class="hint" id="questionHint"></div>
+        <div class="answers" id="answersBox"></div>
+        <div id="feedbackBox" class="feedback hidden"></div>
+
+        <div class="controls">
+          <button class="secondary" id="prevBtn">Previous</button>
+          <button class="danger" id="clearBtn">Clear answer</button>
+          <button class="success" id="checkBtn">Check answer</button>
+          <button class="primary" id="nextBtn">Next</button>
+          <button class="primary hidden" id="finishBtn">Finish quiz</button>
+        </div>
+      </div>
+
+      <div id="resultScreen" class="hidden">
+        <h1>Your result</h1>
+        <div class="result-score" id="finalScore"></div>
+        <p class="sub" id="finalText"></p>
+
+        <div class="stats">
+          <div class="stat"><strong id="correctStat">0</strong>Correct</div>
+          <div class="stat"><strong id="wrongStat">0</strong>Wrong</div>
+          <div class="stat"><strong id="unansweredStat">0</strong>Blank</div>
+          <div class="stat"><strong id="percentStat">0%</strong>Percent</div>
+        </div>
+
+        <div class="controls" style="margin-top:20px;">
+          <button class="primary" id="restartBtn">Back to start</button>
+          <button class="secondary" id="reviewBtn">Show review</button>
+          <button class="secondary" id="practiceWrongBtn">Practice wrong answers</button>
+          <button class="secondary" id="themeBtnResult">Toggle dark mode</button>
+        </div>
+        <div id="reviewSection" class="review-list hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const allQuestions = [
+      { id: 1, question: "The 'Tarikh-i Rashidi' is considered a uniquely valuable source for early Qazaq history for which key reason is mentioned in the introduction of the source?", options: { A: "It is the only text that describes the military alliance between the Qazaqs and the Timurids.", B: "The Qazaq khans of that period did not sponsor the writing of their own histories.", C: "It provides a detailed genealogy linking the Qazaq khans directly to the author's family.", D: "It was written by Mirza Haydar while he was living among the Qazaqs as their official historian." }, correct: ["B"] },
+      { id: 2, question: "Which statements accurately reflect the major phases and objectives of Russian administrative reforms in the Kazakh steppe during the 19th century?", options: { A: "Russian authorities completely prohibited Islamic education and shut down all mosques in the region.", B: "The Orenburg Expedition of 1734 set up a series of forts that expanded Russian influence in the steppe.", C: "The 1822 Statute on the Siberian Kirgiz eliminated the khanates and introduced elected local officials under Russian oversight.", D: "The 1868 and 1886 Statutes created centralized Governor-Generalships and proclaimed all Kazakh land to be state property." }, correct: ["C", "D"] },
+      { id: 3, question: "When the catastrophic drop in the Kazakh population was noted during preparations for the 1937 census, what official explanation did the Soviet authorities provide to cover up the famine?", options: { A: "That Filipp Goloshchekin's 'errors' and 'distortions' were solely responsible for the tragedy.", B: "That a large number of Kazakhs had voluntarily assimilated and re-registered as other nationalities.", C: "That the losses were due to a massive, uncontrolled outbreak of typhus and cholera.", D: "That the population drop was due to Kazakhs migrating to neighboring republics for work.", E: "That the census data from 1926 had vastly overestimated the Kazakh population." }, correct: ["B"] },
+      { id: 4, question: "What reason does Sultan Ahmad Jan Tura give in his 1844 letter for the Kazakhs' particular vulnerability to Kenesary's attacks in late winter and early spring?", options: { A: "The melting snows make the terrain difficult for defense.", B: "The Russian military garrisons are withdrawn during these months.", C: "They are settled in dispersed winter pastures and burdened with caring for their herds.", D: "Their horses are weak from lack of winter forage.", E: "Kenesary receives reinforcements from Kokand during this period." }, correct: ["C"] },
+      { id: 5, question: "What does the work Diwan Lughat al-Turk show about Mahmud al-Kashgari's contributions to Turkic studies?", options: { A: "He produced a map of the Turkic world.", B: "He was a major figure in Sufism.", C: "He compiled the first encyclopedia of Turkic languages.", D: "He wrote a didactic poem on proper governance.", E: "He authored a medical manual used in Europe." }, correct: ["A", "C"] },
+      { id: 6, question: "How did the Botai culture's domestication of horses influence life on the steppe and beyond?", options: { A: "It triggered the Cognitive Revolution and the rise of language.", B: "It was a major innovation with global consequences.", C: "It enabled the start of farming in the region.", D: "It immediately resulted in the first states emerging in Kazakhstan.", E: "It integrated Kazakhstan into the Silk Road." }, correct: ["B"] },
+      { id: 7, question: "What significant development took place on the territory of Kazakhstan about 6,000 years ago?", options: { A: "The formation of the Turkic Khaganate.", B: "The domestication of horses.", C: "The Cognitive Revolution.", D: "The expansion of the Andronovo culture.", E: "The beginning of the Bronze Age." }, correct: ["B"] },
+      { id: 8, question: "Why did early 20th-century Kazakh intellectuals say their society was 'between two fires'?", options: { A: "Kazakh society was shaped simultaneously by Muslim traditions and Russian-Western cultural influences.", B: "Nomadic tribes were battling neighboring Central Asian khanates.", C: "Russian colonial rule and cultural pressure produced a profound crisis of national identity.", D: "Kazakh people had to choose between settling in the steppe or in the mountains." }, correct: ["A", "C"] },
+      { id: 9, question: "What was the defining characteristic of korenizatsiia (indigenization)?", options: { A: "Eliminating cultural and linguistic distinctions.", B: "Elevating Kazakhs into positions of political and administrative authority.", C: "Making Russian the exclusive language used in schools.", D: "Preserving the privileges of Russian officials." }, correct: ["B"] },
+      { id: 10, question: "Why was the tenge introduced as Kazakhstan's national currency in 1993?", options: { A: "To establish an autonomous monetary policy within the country.", B: "To immediately replace the tenge with a shared regional currency.", C: "To secure monetary independence and manage inflation internally.", D: "To tie Kazakhstan's financial system directly to the Russian ruble." }, correct: ["A", "C"] },
+      { id: 11, question: "How did the Alash leaders shape Kazakhstan's political development during and after World War I?", options: { A: "They contributed to the formation of the Kazakh Autonomous Soviet Socialist Republic.", B: "They built a powerful independent army that defeated Soviet forces.", C: "They established the Alash Orda government and supported the development of local councils.", D: "They pursued Kazakh autonomy through negotiations with the Bolsheviks." }, correct: ["A", "C"] },
+      { id: 12, question: "What was the primary objective of the Soviet national-territorial delimitation?", options: { A: "To unite all Central Asian regions into a single Turkestan Republic.", B: "To remove all ethnic classifications and dissolve national boundaries.", C: "To use ethnographic data to transform cultural groups into official political units.", D: "To stop the establishment of ethnic-based borders and autonomous republics." }, correct: ["C"] },
+      { id: 13, question: "Article 91 of the 1995 Constitution specifies certain foundational principles that are unchangeable. Which of the following is explicitly listed as an unchangeable provision?", options: { A: "The independence of the state and the presidential form of its government.", B: "The official use of the Russian language alongside the Kazakh language.", C: "The state's commitment to a secular form of government.", D: "The guarantee of free and compulsory secondary education." }, correct: ["A"] },
+      { id: 14, question: "Pianciola compares the devastation in Kazakhstan to that among other Soviet nomadic populations. What reason does he give for why the Kazakhs suffered so disproportionately?", options: { A: "The Kazakhs were more dependent on grain trade than other nomadic groups, making them vulnerable to grain shortages.", B: "Communist 'modernizing' policies were implemented with unique ruthlessness only in Kazakhstan.", C: "The Kazakhs were the largest Soviet nomadic group, controlling a vast quantity of livestock coveted by the Kremlin.", D: "The Kazakhs offered the most violent and organized resistance to collectivization.", E: "The Kazakhs' political leadership, led by Goloshchekin, was exceptionally incompetent compared to leaders in other nomadic republics." }, correct: ["C"] },
+      { id: 15, question: "According to Michaela Pohl's analysis, what was the primary stated motivation for Nikita Khrushchev's Virgin Lands project?", options: { A: "To develop the economy and improve the living standards of the people already living in northern Kazakhstan.", B: "To intentionally dilute the Kazakh population and solidify Russian demographic control over the republic.", C: "To resolve the Soviet Union's national grain procurement problem and reduce pressure on existing collective farms." }, correct: ["C"] },
+      { id: 16, question: "According to the 1986 protests' data in the official report, which group constituted the single largest number of people arrested?", options: { A: "White-collar employees.", B: "Unemployed people.", C: "Workers.", D: "Students.", E: "High school and technical-training college students." }, correct: ["C"] },
+      { id: 17, question: "The 1986 documents describe violence occurring outside of the direct clashes between protestors and law enforcement. Which of these is a specific example of interethnic civilian conflict mentioned in the collection of documents?", options: { A: "An attack by Russian hooligans on a Kazakh dormitory.", B: "Shopkeepers of Russian ethnicity refused service to all Kazakhs.", C: "The volunteer combatant groups refused to accept Kazakh members.", D: "Protestors burned down a Russian Orthodox church near the square.", E: "Police forces were ordered to arrest only protestors of Kazakh ethnicity." }, correct: ["A"] },
+      { id: 18, question: "How does Sarah Cameron characterize the role of Soviet 'nation-making' policy in the Kazakh famine?", options: { A: "It was a project where economic and national goals aligned to declare pastoral nomadism backward and antithetical to a modern Kazakh identity.", B: "It primarily involved promoting native Kazakh cadres who successfully protected their population from the worst effects of the famine.", C: "It was a policy that was suspended during the famine and only resumed in the mid-1930s.", D: "It was a 'soft-line' policy used to mitigate the harshness of collectivization.", E: "It was largely irrelevant, as the famine was a purely economic policy of resource extraction." }, correct: ["A"] },
+      { id: 19, question: "According to Michaela Pohl's paper, prior to the arrival of the Virgin Lands settlers in 1954, what was a significant characteristic of the Akmolinsk region's population?", options: { A: "It was a major industrial center attracting skilled workers from across the Soviet Union.", B: "It was an unpopulated 'empty' steppe, largely uninhabited before the settlers arrived.", C: "About one-third of the population consisted of 'special' populations, including deported nations and labor camp prisoners.", D: "It was a homogenous region, populated almost exclusively by nomadic Kazakh herders." }, correct: ["C"] },
+      { id: 20, question: "According to Niccolò Pianciola, what was the decisive factor that transformed the famine in Kazakhstan into a catastrophe of such immense proportions between 1931 and 1933?", options: { A: "The mass flight of Kazakh refugees, which led to a collapse of the local economy.", B: "The Kremlin's decision to use Kazakhstan as a strategic meat reserve to feed its elite cities.", C: "A severe and prolonged drought in 1931 that destroyed both pastureland and grain harvests.", D: "The forced sedentarization campaign, which disrupted traditional economic practices.", E: "Excessively high grain procurement quotas imposed on the Kazakh herdsmen." }, correct: ["B"] },
+      { id: 21, question: "According to Aleksei Ivanovich Tevkelev's accounts, when Bukenbai Batyr challenged Tevkelev about Russia's failure to avenge the killing of Bekovich in Khiva, how did Tevkelev respond?", options: { A: "He claimed the story was false and that Bekovich had died in battle with the Persians.", B: "He stated that Russia was occupied with the Great Northern War against Sweden at the time.", C: "He dismissed the question, stating that the affairs of Khiva were irrelevant to the Qazaqs.", D: "He promised that a Russian army was already marching on Khiva to exact revenge." }, correct: ["B"] },
+      { id: 22, question: "What was a significant outcome of Ivan Kalita, the Prince of Moscow, gaining the favor of the Golden Horde in the 1320s?", options: { A: "He was granted the right to collect Tatar taxes from other Russian princes.", B: "He convinced Khan Özbek to convert to Orthodox Christianity.", C: "He led a successful rebellion that overthrew Tatar rule a century early.", D: "He moved the capital of the Golden Horde from Sarai to Moscow." }, correct: ["A"] },
+      { id: 23, question: "'The Scientific Revolution began when people started to admit their ignorance.' What does this suggest about the character of that era?", options: { A: "It implies that earlier knowledge was completely rejected.", B: "It suggests Europeans were intellectually weaker than other societies.", C: "It means people stopped using their imagination.", D: "It indicates that scientific progress happened by chance rather than through deliberate research.", E: "It reflects a major change from relying on traditional beliefs to embracing a mindset grounded in questioning, investigation, and evidence." }, correct: ["E"] },
+      { id: 24, question: "In the context of economic diplomacy, the Concept aims to facilitate the transfer of advanced foreign technologies to support which specific state program?", options: { A: "The 'Rukhani Zhangyru' programme.", B: "The 'Nurly Zhol' state programme.", C: "The 'State Trade Policy Programme until 2025'.", D: "The Concept on the transition to the 'green economy'.", E: "The State Programme 'Digital Kazakhstan'." }, correct: ["E"] },
+      { id: 25, question: "Which two regions became key zones of conflict for the Western Turkic Khaganate after Tong Yabghu's death?", options: { A: "The Gobi Desert.", B: "The Syr Darya basin.", C: "Zhetysu.", D: "The Altai Mountains.", E: "The Caucasus region." }, correct: ["B", "C"] },
+      { id: 26, question: "According to Article 10 of the 1995 Constitution, under which specific circumstance can a citizen of the Republic of Kazakhstan be deprived of their citizenship?", options: { A: "By presidential decree for acts considered a threat to national security.", B: "By a court decision for committing terrorist crimes or causing other grave harm to the Republic's interests.", C: "Automatically upon acquiring the citizenship of a foreign state.", D: "For evading mandatory military service as defined by law." }, correct: ["B"] },
+      { id: 27, question: "Which statements best describe the origins and character of Russia's colonial expansion into Kazakhstan during the 18th century?", options: { A: "Abulkhair Khan's pledge to Russia in the 1730s was viewed by the Kazakhs as a military partnership, not a loss of sovereignty.", B: "Russia treated Abulkhair's oath as full incorporation, expecting taxes, hostages, and allegiance to the empire.", C: "Abulkhair Khan's request to Russia was mainly intended to obtain trade benefits with the Qing Empire.", D: "Speransky's 1822 reforms and Uyama's concept of 'Asiatic Russia' created complete Kazakh independence from Russian authority." }, correct: ["A", "B"] },
+      { id: 28, question: "According to the official report from 1986, what was one of the first non-lethal, large-scale methods used by authorities to disperse the crowd on the evening of December 17?", options: { A: "Using armored troop-carriers to push back the protestors.", B: "Applying fire-engines to spray the crowd with water.", C: "Blasting loud music and propaganda from speakers.", D: "Setting up a cordon of volunteer combatants armed with iron sticks.", E: "Deploying commandos with special sticks to break the crowd." }, correct: ["B"] },
+      { id: 29, question: "What were the major outcomes of Kazakhstan's Constitutional Law on State Independence (1991)?", options: { A: "It allowed the republic to create its own independent economic system.", B: "It integrated Kazakhstan into a new union with other former Soviet states.", C: "It confirmed national ownership of land, natural resources, and airspace.", D: "It banned private property and reinstated a centralized Soviet-style economy." }, correct: ["A", "C"] },
+      { id: 30, question: "What was the central debate among Kazakh intellectuals in the early 1900s?", options: { A: "How to fully implement all European education and modernization.", B: "How to modernize society while maintaining Kazakh cultural identity.", C: "Whether Kazakhs should continue a nomadic lifestyle or transition to a settled one.", D: "Whether Kazakhstan should seek protection by joining the Ottoman Empire." }, correct: ["B", "C"] },
+      { id: 31, question: "Which statements accurately describe the social, cultural, and legal effects of Russian imperial policy in the Kazakh steppe?", options: { A: "The reforms produced a corruption-free colonial administration in which Kazakh elites were fully incorporated as equal partners.", B: "The Kazakhs were completely cut off from southern neighbors and engaged in no economic interaction with them.", C: "The 'civilizing mission' aimed to assimilate Kazakhs through language, religion, and schooling, leading to both cooperation and resistance.", D: "Russian authorities attempted to replace Kazakh customary law (adat) with written imperial legislation, though biys' courts continued to operate alongside it." }, correct: ["C", "D"] },
+      { id: 32, question: "Which statements accurately reflect the foreign policy of the Kazakh khans in the early 18th century?", options: { A: "After Tauke Khan's death, the three Juzes operated separately, resulting in a foreign policy with multiple directions.", B: "The Kazakh khans entirely avoided forming alliances with outside powers to maintain complete independence.", C: "The Jungar threat compelled Abulkhair Khan of the Junior Juz to seek Russian alliance and protection.", D: "Ablay Khan simultaneously governed all three Juzes with direct Russian military backing." }, correct: ["A", "C"] },
+      { id: 33, question: "How does 'Abdrahman Baidildin frame the adoption of the Latin alphabet in a broader socio-political context?", options: { A: "As a way to preserve the unique, isolated culture of the Kazakh people from foreign influence.", B: "As a temporary measure until a unique Kazakh script could be invented.", C: "As a key part of the cultural revolution envisioned by Lenin, enabling access to international science and progress.", D: "As a necessary step to join the pan-Islamic world and its culture." }, correct: ["C"] },
+      { id: 34, question: "What was the long-term significance of the Battle of Kulikovo in 1380?", options: { A: "It led to an alliance between Moscow and Lithuania against the Tatars.", B: "It was a major psychological victory for the Russians, boosting their morale.", C: "It immediately ended the Tatar Yoke over the Russian principalities.", D: "It caused the final fragmentation of the Golden Horde into separate khanates." }, correct: ["B"] },
+      { id: 35, question: "Which two archaeological finds in Kazakhstan are noted as having worldwide significance?", options: { A: "Petroglyphs in northern Kazakhstan.", B: "Burial mounds (kurgans).", C: "The ancient city of Otrar.", D: "The Golden Man from Issyk.", E: "Botai culture evidence of horse domestication." }, correct: ["D", "E"] },
+      { id: 36, question: "Which major international activities and institutions are closely linked with Kazakhstan?", options: { A: "Its membership in the UN and its 2010 chairmanship of the OSCE.", B: "Limiting participation to regional bodies and avoiding global organizations.", C: "Exiting development banks such as the EBRD and ADB.", D: "Its role in founding the Conference on Interaction and Confidence-Building Measures in Asia (CICA)." }, correct: ["A", "D"] },
+      { id: 37, question: "The December 1917 Congress resolved to create a people's militia of 13,500 men. How were the necessary resources like horses and clothing to be initially provided?", options: { A: "They were to be purchased from the national fund of Alash Orda.", B: "Resources were to be requisitioned from the former Tsarist army garrisons.", C: "Each militiaman was required to provide his own equipment.", D: "They expected to receive supplies from the Provisional Government.", E: "Each aul (village) community was obliged to provide for its own militiamen." }, correct: ["E"] }
+    ];
+
+    let quizQuestions = [];
+    let currentIndex = 0;
+    let userAnswers = [];
+    let checkedAnswers = [];
+    let score = 0;
+    let wrongQuestionIds = JSON.parse(localStorage.getItem('cvWrongQuestionIds') || '[]');
+    let timerMinutes = 0;
+    let timerSecondsLeft = 0;
+    let timerInterval = null;
+    let instantFeedbackEnabled = true;
+
+    const body = document.body;
+    const startScreen = document.getElementById('startScreen');
+    const quizScreen = document.getElementById('quizScreen');
+    const resultScreen = document.getElementById('resultScreen');
+    const questionText = document.getElementById('questionText');
+    const questionHint = document.getElementById('questionHint');
+    const answersBox = document.getElementById('answersBox');
+    const counter = document.getElementById('counter');
+    const scorePreview = document.getElementById('scorePreview');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const checkBtn = document.getElementById('checkBtn');
+    const feedbackBox = document.getElementById('feedbackBox');
+    const finalScore = document.getElementById('finalScore');
+    const finalText = document.getElementById('finalText');
+    const restartBtn = document.getElementById('restartBtn');
+    const reviewBtn = document.getElementById('reviewBtn');
+    const reviewSection = document.getElementById('reviewSection');
+    const practiceWrongBtn = document.getElementById('practiceWrongBtn');
+    const correctStat = document.getElementById('correctStat');
+    const wrongStat = document.getElementById('wrongStat');
+    const unansweredStat = document.getElementById('unansweredStat');
+    const percentStat = document.getElementById('percentStat');
+    const timerPill = document.getElementById('timerPill');
+    const startQuizBtn = document.getElementById('startQuizBtn');
+    const startWrongBtn = document.getElementById('startWrongBtn');
+    const instantFeedbackToggle = document.getElementById('instantFeedbackToggle');
+    const shuffleToggle = document.getElementById('shuffleToggle');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const timerSelect = document.getElementById('timerSelect');
+    const themeBtnStart = document.getElementById('themeBtnStart');
+    const themeBtnQuiz = document.getElementById('themeBtnQuiz');
+    const themeBtnResult = document.getElementById('themeBtnResult');
+
+    function arraysEqual(a, b) {
+      const x = [...a].sort();
+      const y = [...b].sort();
+      return JSON.stringify(x) === JSON.stringify(y);
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const sec = (seconds % 60).toString().padStart(2, '0');
+      return `${min}:${sec}`;
+    }
+
+    function updateTimerDisplay() {
+      timerPill.textContent = timerMinutes > 0 ? `Time: ${formatTime(timerSecondsLeft)}` : 'Time: --:--';
+    }
+
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    function startTimer() {
+      stopTimer();
+      if (timerMinutes <= 0) {
+        updateTimerDisplay();
+        return;
+      }
+      timerSecondsLeft = timerMinutes * 60;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timerSecondsLeft--;
+        updateTimerDisplay();
+        if (timerSecondsLeft <= 0) {
+          stopTimer();
+          showResults(true);
+        }
+      }, 1000);
+    }
+
+    function applyTheme(isDark) {
+      body.classList.toggle('dark', isDark);
+      darkModeToggle.checked = isDark;
+    }
+
+    function toggleTheme() {
+      applyTheme(!body.classList.contains('dark'));
+    }
+
+    function buildQuizQuestions(mode) {
+      if (mode === 'wrong') {
+        const filtered = allQuestions.filter(q => wrongQuestionIds.includes(q.id));
+        quizQuestions = filtered.length ? filtered : [...allQuestions];
+      } else {
+        quizQuestions = [...allQuestions];
+      }
+      if (shuffleToggle.checked) quizQuestions = shuffleArray(quizQuestions);
+    }
+
+    function startQuiz(mode = 'full') {
+      buildQuizQuestions(mode);
+      currentIndex = 0;
+      userAnswers = Array(quizQuestions.length).fill(null).map(() => []);
+      checkedAnswers = Array(quizQuestions.length).fill(false);
+      score = 0;
+      instantFeedbackEnabled = instantFeedbackToggle.checked;
+      timerMinutes = Number(timerSelect.value);
+      applyTheme(darkModeToggle.checked);
+      reviewSection.classList.add('hidden');
+      reviewBtn.textContent = 'Show review';
+      startScreen.classList.add('hidden');
+      resultScreen.classList.add('hidden');
+      quizScreen.classList.remove('hidden');
+      startTimer();
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = quizQuestions[currentIndex];
+      const isMultiple = q.correct.length > 1;
+      questionText.textContent = `${q.id}. ${q.question}`;
+      questionHint.textContent = isMultiple ? `Select ${q.correct.length} answers.` : 'Select 1 answer.';
+      counter.textContent = `Question ${currentIndex + 1} / ${quizQuestions.length}`;
+      scorePreview.textContent = `Score: ${score}`;
+      progressBar.style.width = `${((currentIndex + 1) / quizQuestions.length) * 100}%`;
+      feedbackBox.classList.add('hidden');
+      feedbackBox.textContent = '';
+
+      answersBox.innerHTML = '';
+      Object.entries(q.options).forEach(([key, value]) => {
+        const label = document.createElement('label');
+        label.className = 'option';
+        if (userAnswers[currentIndex].includes(key)) label.classList.add('selected');
+
+        const input = document.createElement('input');
+        input.type = isMultiple ? 'checkbox' : 'radio';
+        input.name = `question-${q.id}`;
+        input.value = key;
+        input.checked = userAnswers[currentIndex].includes(key);
+        input.disabled = checkedAnswers[currentIndex];
+
+        input.addEventListener('change', () => {
+          if (checkedAnswers[currentIndex]) return;
+          if (isMultiple) {
+            let selected = [...userAnswers[currentIndex]];
+            if (input.checked) {
+              if (!selected.includes(key)) selected.push(key);
+            } else {
+              selected = selected.filter(item => item !== key);
+            }
+            userAnswers[currentIndex] = selected;
+          } else {
+            userAnswers[currentIndex] = [key];
+          }
+          renderQuestion();
+        });
+
+        label.appendChild(input);
+        label.append(` ${key}) ${value}`);
+
+        if (checkedAnswers[currentIndex]) {
+          if (q.correct.includes(key)) label.classList.add('correct-answer');
+          if (userAnswers[currentIndex].includes(key) && !q.correct.includes(key)) label.classList.add('wrong-answer');
+        }
+
+        answersBox.appendChild(label);
+      });
+
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.classList.toggle('hidden', currentIndex === quizQuestions.length - 1);
+      finishBtn.classList.toggle('hidden', currentIndex !== quizQuestions.length - 1);
+
+      if (checkedAnswers[currentIndex]) {
+        const correctText = [...q.correct].sort().join(', ');
+        const isRight = arraysEqual(userAnswers[currentIndex], q.correct);
+        feedbackBox.className = `feedback ${isRight ? 'correct' : 'wrong'}`;
+        feedbackBox.innerHTML = isRight ? `Correct! ✅` : `Not correct. ❌ Correct answer: ${correctText}`;
+        feedbackBox.classList.remove('hidden');
+      }
+    }
+
+    function checkCurrentAnswer() {
+      if (checkedAnswers[currentIndex]) return;
+      const q = quizQuestions[currentIndex];
+      const selected = userAnswers[currentIndex];
+      if (!selected.length) {
+        feedbackBox.className = 'feedback wrong';
+        feedbackBox.textContent = 'Choose at least one answer first.';
+        feedbackBox.classList.remove('hidden');
+        return;
+      }
+      checkedAnswers[currentIndex] = true;
+      if (arraysEqual(selected, q.correct)) score++;
+      if (instantFeedbackEnabled) renderQuestion();
+      else scorePreview.textContent = `Score: ${score}`;
+    }
+
+    function showResults(timeExpired = false) {
+      stopTimer();
+      quizScreen.classList.add('hidden');
+      resultScreen.classList.remove('hidden');
+
+      let correctCount = 0;
+      let wrongCount = 0;
+      let blankCount = 0;
+      const currentWrongIds = [];
+
+      quizQuestions.forEach((q, index) => {
+        if (!userAnswers[index].length) {
+          blankCount++;
+          currentWrongIds.push(q.id);
+        } else if (arraysEqual(userAnswers[index], q.correct)) {
+          correctCount++;
+        } else {
+          wrongCount++;
+          currentWrongIds.push(q.id);
+        }
+      });
+
+      wrongQuestionIds = [...new Set(currentWrongIds)];
+      localStorage.setItem('cvWrongQuestionIds', JSON.stringify(wrongQuestionIds));
+
+      const percent = Math.round((correctCount / quizQuestions.length) * 100);
+      finalScore.textContent = `${correctCount} / ${quizQuestions.length}`;
+      finalText.textContent = timeExpired ? `Time is up. You scored ${percent}%.` : `You scored ${percent}%.`;
+      correctStat.textContent = correctCount;
+      wrongStat.textContent = wrongCount;
+      unansweredStat.textContent = blankCount;
+      percentStat.textContent = `${percent}%`;
+
+      renderReview();
+    }
+
+    function renderReview() {
+      reviewSection.innerHTML = '';
+      quizQuestions.forEach((q, index) => {
+        const item = document.createElement('div');
+        const correct = arraysEqual(userAnswers[index], q.correct);
+        item.className = `review-item ${correct ? 'correct' : 'wrong'}`;
+
+        const userText = userAnswers[index].length ? userAnswers[index].sort().join(', ') : 'No answer';
+        const correctText = [...q.correct].sort().join(', ');
+
+        item.innerHTML = `
+          <div><strong>${q.id}. ${q.question}</strong></div>
+          <div class="small muted" style="margin-top:8px;">Your answer: ${userText}</div>
+          <div class="small muted">Correct answer: ${correctText}</div>
+        `;
+        reviewSection.appendChild(item);
+      });
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (!checkedAnswers[currentIndex] && instantFeedbackEnabled) checkCurrentAnswer();
+      if (currentIndex < quizQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      }
+    });
+
+    finishBtn.addEventListener('click', () => {
+      if (!checkedAnswers[currentIndex] && instantFeedbackEnabled) checkCurrentAnswer();
+      showResults();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      if (checkedAnswers[currentIndex]) return;
+      userAnswers[currentIndex] = [];
+      renderQuestion();
+    });
+
+    checkBtn.addEventListener('click', checkCurrentAnswer);
+
+    restartBtn.addEventListener('click', () => {
+      stopTimer();
+      resultScreen.classList.add('hidden');
+      quizScreen.classList.add('hidden');
+      startScreen.classList.remove('hidden');
+    });
+
+    reviewBtn.addEventListener('click', () => {
+      reviewSection.classList.toggle('hidden');
+      reviewBtn.textContent = reviewSection.classList.contains('hidden') ? 'Show review' : 'Hide review';
+    });
+
+    practiceWrongBtn.addEventListener('click', () => startQuiz('wrong'));
+    startQuizBtn.addEventListener('click', () => startQuiz('full'));
+    startWrongBtn.addEventListener('click', () => startQuiz('wrong'));
+    themeBtnStart.addEventListener('click', toggleTheme);
+    themeBtnQuiz.addEventListener('click', toggleTheme);
+    themeBtnResult.addEventListener('click', toggleTheme);
+
+    applyTheme(false);
+    updateTimerDisplay();
+  </script>
+</body>
+</html>
